@@ -6,12 +6,10 @@ mod ising_store;
 use ising_evolve::*;
 use ising_plot::*;
 use ising_store::*;
-use plotters::prelude::*;
 use rand::prelude::*;
 use std::fs::File;
 use std::io::stdout;
 use std::io::Write;
-use std::io::Write as IoWrite;
 use std::str::FromStr;
 
 fn main() {

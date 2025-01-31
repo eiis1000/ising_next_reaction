@@ -29,10 +29,6 @@ impl TimeDistributions {
         (energy + nn) as usize
     }
 
-    pub fn get(&self, energy: i8) -> &Exp<f32> {
-        self.direct_get(Self::energy_to_index(energy))
-    }
-
     pub fn direct_get(&self, index: usize) -> &Exp<f32> {
         &self.distr[index]
     }

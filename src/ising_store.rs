@@ -1,6 +1,5 @@
 use bit_vec::BitVec;
 use rand::prelude::*;
-use rand_distr::Exp;
 use std::fmt;
 
 pub struct NeighborData<T> {
@@ -84,7 +83,7 @@ impl Ising {
         }
     }
 
-    pub fn get_ix(&self, ix: usize) -> bool {
+    pub fn _get_ix(&self, ix: usize) -> bool {
         self.store[ix]
     }
 

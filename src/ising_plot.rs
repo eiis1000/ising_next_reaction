@@ -78,7 +78,7 @@ pub fn plot_simulation_data(
     Ok(())
 }
 
-fn old_plot_data(data: &Vec<(f32, f64)>) {
+fn _old_plot_data(data: &Vec<(f32, f64)>) {
     let root_area = BitMapBackend::new("output.png", (640, 480)).into_drawing_area();
     root_area.fill(&WHITE).unwrap();
 
