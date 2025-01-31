@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+anyhow = "1.0.95"
 bit-vec = "0.8.0"
 itertools = "0.14.0"
 noisy_float = "0.2.0"

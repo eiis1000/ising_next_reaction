@@ -3,6 +3,7 @@ mod ising_evolve;
 mod ising_plot;
 mod ising_store;
 
+use anyhow::Result;
 use ising_evolve::*;
 use ising_plot::*;
 use ising_store::*;
@@ -12,23 +13,23 @@ use std::io::stdout;
 use std::io::Write;
 use std::str::FromStr;
 
-fn main() {
-    let in_width: usize = get_input("Enter min width", 30);
+fn main() -> Result<()> {
+    let in_width: usize = get_input("Enter min width", 30)?;
     let width = in_width.next_power_of_two();
     if in_width != width {
-        println!("Using actual width {width}.")
+        println!("Using actual width {width}.");
     }
-    let in_height = get_input("Enter min height", width);
+    let in_height = get_input("Enter min height", width)?;
     let height = in_height.next_power_of_two();
     if in_height != height {
         println!("Using actual height {height}.")
     }
-    let min_temp: f32 = get_input("Enter minimum temperature", 2.0);
-    let max_temp: f32 = get_input("Enter maximum temperature", 2.6);
-    let num_temp: u8 = get_input("Enter number of temperatures", 20);
-    let num_shots: u8 = get_input("Enter number of shots", 5);
-    let tmax: f32 = get_input("Enter tmax", 10000.0);
-    let subtimes: usize = get_input("Enter subtimes", 10);
+    let min_temp: f32 = get_input("Enter minimum temperature", 2.0)?;
+    let max_temp: f32 = get_input("Enter maximum temperature", 2.6)?;
+    let num_temp: u8 = get_input("Enter number of temperatures", 20)?;
+    let num_shots: u8 = get_input("Enter number of shots", 5)?;
+    let tmax: f32 = get_input("Enter tmax", 10000.0)?;
+    let subtimes: usize = get_input("Enter subtimes", 10)?;
 
     let mut data: Vec<(f32, f64)> = Vec::new();
 
@@ -37,18 +38,19 @@ fn main() {
         for shot in 0..num_shots {
             let mut rng = rand_pcg::Pcg64Mcg::seed_from_u64(shot.into());
             // update_temperature_display(temp);
-            let mean_abs_mag = evolve_with(width, height, 1. / temp, tmax, subtimes, &mut rng);
+            let mean_abs_mag = evolve_with(width, height, 1. / temp, tmax, subtimes, &mut rng)?;
             data.push((temp, mean_abs_mag));
         }
     }
 
     let filename =
         format!("{width}_{tmax}_{subtimes}_{min_temp}_{max_temp}_{num_temp}_{num_shots}");
-    plot_simulation_data(&data, (filename.clone() + ".png").as_str()).unwrap();
-    let mut file = File::create((filename + ".txt").as_str()).expect("Unable to create file");
+    plot_simulation_data(&data, (filename.clone() + ".png").as_str())?;
+    let mut file = File::create((filename + ".txt").as_str())?;
     for (temp, mean_abs_mag) in &data {
-        writeln!(file, "{}, {}", temp, mean_abs_mag).expect("Unable to write data");
+        writeln!(file, "{}, {}", temp, mean_abs_mag)?;
     }
+    Ok(())
 }
 
 fn evolve_with(
@@ -58,13 +60,13 @@ fn evolve_with(
     tmax: f32,
     subtimes: usize,
     rng: &mut impl Rng,
-) -> f64 {
+) -> Result<f64> {
     println!("Building grid...");
     let mut ising = Ising::new(width, height, rng);
     println!("Done, built of size {}.", ising.get_size().2);
 
     println!("Building manager at temperature {}...", 1. / beta);
-    let mut manager = IsingEvolutionManager::new(&mut ising, beta, rng);
+    let mut manager = IsingEvolutionManager::new(&mut ising, beta, rng)?;
     println!("Done.");
 
     let subsim_tmax = tmax / subtimes as f32;
@@ -98,17 +100,17 @@ fn evolve_with(
     let mean_abs_mag = mags.iter().map(|x| x.abs()).sum::<f64>() / mags.len() as f64;
     println!("The mean final absolute magnetization was {}", mean_abs_mag);
     // update_temperature_display(1.0 / beta);
-    mean_abs_mag
+    Ok(mean_abs_mag)
 }
 
-fn get_input<T: FromStr + std::fmt::Display>(prompt: &str, default: T) -> T {
+fn get_input<T: FromStr + std::fmt::Display>(prompt: &str, default: T) -> Result<T> {
     print!("{} (default {}): ", prompt, default);
-    stdout().flush().unwrap();
+    stdout().flush()?;
     let mut input = String::new();
-    std::io::stdin().read_line(&mut input).unwrap();
-    input.trim().parse::<T>().unwrap_or_else(|_| {
-        // eprintln!("Invalid input, try again.");
-        // get_input(prompt, default)
+    std::io::stdin().read_line(&mut input)?;
+    let res = input.trim().parse::<T>().unwrap_or_else(|_| {
+        eprintln!("Invalid input, using default value.");
         default
-    })
+    });
+    Ok(res)
 }

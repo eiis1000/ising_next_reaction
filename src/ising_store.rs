@@ -15,13 +15,15 @@ pub struct Ising {
 impl Ising {
     pub const CHAR0: char = ' ';
     pub const CHAR1: char = '█';
-    pub const REPEAT_CHARS: bool = false;
-    pub const NUM_NEIGHBORS: u8 = 4; // excludes self
-    pub const NUM_ENERGIES: usize = (Ising::NUM_NEIGHBORS * 2 + 1) as usize;
+    pub const REPEAT_CHARS: bool = true;
+    // this is the number of neighbors of a given spin, not including itself
+    pub const NUM_NEIGHBORS: u8 = 4;
+    // if the i8 representation of the energy is between -m and +M, this is M+m+1.
+    pub const NUM_ENERGIES: u8 = (Ising::NUM_NEIGHBORS * 2 + 1) as u8;
 
     pub fn new(width: usize, height: usize, rng: &mut dyn RngCore) -> Ising {
         let n_cells = width * height;
-        assert!(n_cells % 8 == 0, "number of cells isn't a multiple of 8.");
+        assert_eq!(n_cells % 8, 0, "number of cells isn't a multiple of 8.");
         let n_bytes = n_cells / 8;
 
         println!("Allocating vec...");
@@ -98,8 +100,7 @@ impl Ising {
 
 impl fmt::Display for Ising {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let mut output =
-            String::with_capacity((self.width * self.height) as usize + self.height as usize);
+        let mut output = String::with_capacity((self.width + 2) * self.height);
         let mut idx: usize = 0;
         for _ in 0..self.height {
             for _ in 0..self.width {
@@ -109,7 +110,7 @@ impl fmt::Display for Ising {
                 if Ising::REPEAT_CHARS {
                     output.push(c);
                 }
-                idx = idx + 1;
+                idx += 1;
             }
             output.push('\n');
         }

@@ -1,11 +1,9 @@
+use anyhow::{anyhow, Result};
 use noisy_float::types::N32;
 use plotters::prelude::*;
 use std::collections::HashMap;
 
-pub fn plot_simulation_data(
-    data: &[(f32, f64)],
-    output_path: &str,
-) -> Result<(), Box<dyn std::error::Error>> {
+pub fn plot_simulation_data(data: &[(f32, f64)], output_path: &str) -> Result<()> {
     // Group data by x-value using noisy_float for safe comparison
     let mut groups: HashMap<N32, Vec<f64>> = HashMap::new();
     for &(x, y) in data {
@@ -32,8 +30,14 @@ pub fn plot_simulation_data(
     let root = BitMapBackend::new(output_path, (1024, 768)).into_drawing_area();
     root.fill(&WHITE)?;
 
-    let x_min = plot_data.first().unwrap().0;
-    let x_max = plot_data.last().unwrap().0;
+    let x_min = plot_data
+        .first()
+        .ok_or_else(|| anyhow!("No data available"))?
+        .0;
+    let x_max = plot_data
+        .last()
+        .ok_or_else(|| anyhow!("No data available"))?
+        .0;
     let y_min = plot_data
         .iter()
         .map(|(_, y, _)| y)
@@ -78,30 +82,30 @@ pub fn plot_simulation_data(
     Ok(())
 }
 
-fn _old_plot_data(data: &Vec<(f32, f64)>) {
+fn _old_plot_data(data: &Vec<(f32, f64)>) -> Result<()> {
     let root_area = BitMapBackend::new("output.png", (640, 480)).into_drawing_area();
-    root_area.fill(&WHITE).unwrap();
+    root_area.fill(&WHITE)?;
 
     let min_x = *data
         .iter()
         .map(|(x, _)| x)
         .min_by(|a, b| a.partial_cmp(b).unwrap())
-        .unwrap();
+        .ok_or_else(|| anyhow!("No data available"))?;
     let max_x = *data
         .iter()
         .map(|(x, _)| x)
         .max_by(|a, b| a.partial_cmp(b).unwrap())
-        .unwrap();
+        .ok_or_else(|| anyhow!("No data available"))?;
     let min_y = *data
         .iter()
         .map(|(_, y)| y)
         .min_by(|a, b| a.partial_cmp(b).unwrap())
-        .unwrap();
+        .ok_or_else(|| anyhow!("No data available"))?;
     let max_y = *data
         .iter()
         .map(|(_, y)| y)
         .max_by(|a, b| a.partial_cmp(b).unwrap())
-        .unwrap();
+        .ok_or_else(|| anyhow!("No data available"))?;
 
     let mut chart = ChartBuilder::on(&root_area)
         .caption(
@@ -111,17 +115,15 @@ fn _old_plot_data(data: &Vec<(f32, f64)>) {
         .margin(10)
         .x_label_area_size(30)
         .y_label_area_size(30)
-        .build_cartesian_2d(min_x..max_x, min_y..max_y)
-        .unwrap();
+        .build_cartesian_2d(min_x..max_x, min_y..max_y)?;
 
-    chart.configure_mesh().draw().unwrap();
+    chart.configure_mesh().draw()?;
 
     chart
         .draw_series(LineSeries::new(
             data.iter().map(|(temp, mam)| (*temp, *mam)),
             &RED,
-        ))
-        .unwrap()
+        ))?
         .label("Mean Absolute Magnetization")
         .legend(|(x, y)| PathElement::new(vec![(x, y), (x + 20, y)], &RED));
 
@@ -129,6 +131,7 @@ fn _old_plot_data(data: &Vec<(f32, f64)>) {
         .configure_series_labels()
         .background_style(&WHITE.mix(0.8))
         .border_style(&BLACK)
-        .draw()
-        .unwrap();
+        .draw()?;
+
+    Ok(())
 }

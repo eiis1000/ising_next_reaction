@@ -1,3 +1,4 @@
+use anyhow::Result;
 use noisy_float::prelude::*;
 use priority_queue::PriorityQueue;
 use rand::prelude::*;
@@ -11,16 +12,12 @@ pub struct TimeDistributions {
 }
 
 impl TimeDistributions {
-    pub fn new(beta: f32) -> TimeDistributions {
-        // from detailed balance, we know R(+dE)/R(-dE)=exp[-beta dE]
-        // which gives us that R(dE)=r_0 exp[-beta dE / 2].
-        // BUT... dE = -2E, so great, in total R(E -> -E) = r_0 exp[beta E]
-        // we'll set r_0=1 to set the time scale
-        let mut distr = [Exp::new(1.0).unwrap(); 9];
+    pub fn new(beta: f32) -> Result<TimeDistributions> {
+        let mut distr = [Exp::new(1.0)?; 9];
         for (i, d) in distr.iter_mut().enumerate() {
-            *d = Exp::new(((i as i32 - 4) as f32 * beta).exp()).unwrap();
+            *d = Exp::new(((i as i32 - 4) as f32 * beta).exp())?;
         }
-        TimeDistributions { distr }
+        Ok(TimeDistributions { distr })
     }
 
     pub fn energy_to_index(energy: i8) -> usize {
@@ -37,8 +34,8 @@ impl TimeDistributions {
 pub struct TimeDistributionsResultBuffer<'a, R> {
     rng: &'a mut R,
     distr: &'a TimeDistributions,
-    bufs: [Vec<f32>; Ising::NUM_ENERGIES],
-    pub buf_sizes: [usize; Ising::NUM_ENERGIES],
+    bufs: [Vec<f32>; Ising::NUM_ENERGIES as usize],
+    pub buf_sizes: [usize; Ising::NUM_ENERGIES as usize],
 }
 
 impl<'a, R: Rng> TimeDistributionsResultBuffer<'a, R> {
@@ -53,7 +50,7 @@ impl<'a, R: Rng> TimeDistributionsResultBuffer<'a, R> {
             rng,
             distr,
             bufs: Default::default(),
-            buf_sizes: [Self::DEFAULT_BUF_SIZE; Ising::NUM_ENERGIES],
+            buf_sizes: [Self::DEFAULT_BUF_SIZE; Ising::NUM_ENERGIES as usize],
         }
     }
 
@@ -82,8 +79,12 @@ pub struct IsingEvolutionManager<'a, R: Rng> {
 }
 
 impl<'a, R: Rng> IsingEvolutionManager<'a, R> {
-    pub fn new(ising: &'a mut Ising, beta: f32, rng: &'a mut R) -> IsingEvolutionManager<'a, R> {
-        let distr = TimeDistributions::new(beta);
+    pub fn new(
+        ising: &'a mut Ising,
+        beta: f32,
+        rng: &'a mut R,
+    ) -> Result<IsingEvolutionManager<'a, R>> {
+        let distr = TimeDistributions::new(beta)?;
         let pq = PriorityQueue::<usize, Reverse<R32>>::new();
         let mut res = IsingEvolutionManager {
             ising,
@@ -93,7 +94,7 @@ impl<'a, R: Rng> IsingEvolutionManager<'a, R> {
             rng,
         };
         res.initialize_pq_buffered();
-        res
+        Ok(res)
     }
 
     fn initialize_pq_buffered(&mut self) {
