@@ -24,10 +24,11 @@ pub struct Ising {
 impl Ising {
     pub const CHAR0: char = ' ';
     pub const CHAR1: char = '█';
+    // when displaying the grid, prints each character twice for aspect ratio
     pub const REPEAT_CHARS: bool = true;
     // this is the number of neighbors of a given spin, not including itself
     pub const NUM_NEIGHBORS: u8 = 4;
-    // if the i8 representation of the energy is between -m and +M, this is M+m+1.
+    // if the i8 representation of the energy is between -m and +M, this is M+m+1
     pub const NUM_ENERGIES: u8 = (Ising::NUM_NEIGHBORS * 2 + 1) as u8;
 
     pub fn new(width: usize, height: usize, rng: &mut dyn RngCore) -> Ising {
