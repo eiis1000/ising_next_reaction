@@ -31,7 +31,7 @@ impl Ising {
     // if the i8 representation of the energy is between -m and +M, this is M+m+1
     pub const NUM_ENERGIES: u8 = (Ising::NUM_NEIGHBORS * 2 + 1) as u8;
 
-    pub fn new(width: usize, height: usize, rng: &mut dyn RngCore) -> Ising {
+    pub fn new(width: usize, height: usize, rng: &mut impl Rng) -> Ising {
         let n_cells = width * height;
         assert_eq!(n_cells % 8, 0, "number of cells isn't a multiple of 8.");
         let n_bytes = n_cells / 8;
