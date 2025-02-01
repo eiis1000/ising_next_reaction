@@ -14,7 +14,7 @@ use std::io::Write;
 use std::str::FromStr;
 
 fn main() -> Result<()> {
-    let in_width: usize = get_input("Enter min width", 30)?;
+    let in_width: usize = get_input("Enter min width", 128)?;
     let width = in_width.next_power_of_two();
     if in_width != width {
         println!("Using actual width {width}.");
@@ -24,12 +24,12 @@ fn main() -> Result<()> {
     if in_height != height {
         println!("Using actual height {height}.")
     }
-    let min_temp: f32 = get_input("Enter minimum temperature", 2.0)?;
-    let max_temp: f32 = get_input("Enter maximum temperature", 2.6)?;
-    let num_temp: u8 = get_input("Enter number of temperatures", 20)?;
-    let num_shots: u8 = get_input("Enter number of shots", 5)?;
+    let min_temp: f32 = get_input("Enter minimum temperature", 2.2)?;
+    let max_temp: f32 = get_input("Enter maximum temperature", 2.4)?;
+    let num_temp: u8 = get_input("Enter number of temperatures", 6)?;
+    let num_shots: u8 = get_input("Enter number of shots", 4)?;
     let tmax: f32 = get_input("Enter tmax", 10000.0)?;
-    let subtimes: usize = get_input("Enter subtimes", 10)?;
+    let subtimes: usize = get_input("Enter subtimes", 300)?;
 
     let mut data: Vec<(f32, f64)> = Vec::new();
 
@@ -72,8 +72,8 @@ fn evolve_with(
     let subsim_tmax = tmax / subtimes as f32;
     for st in 0..(subtimes - 1) {
         let n_flips = manager.evolve_ising_until(subsim_tmax * (st + 1) as f32, |_| ());
-        println!(
-            "{}\nabove was st {}, t={} of T={} with {} flipped and magnetization {}",
+        print!(
+            "{}\nabove was st {}, t={} of T={} with {} flipped and magnetization {}\x1B[A\x1B[G",
             manager.get_ising(),
             st,
             manager.get_time(),
@@ -81,6 +81,7 @@ fn evolve_with(
             n_flips,
             manager.get_ising().magnetization()
         );
+        std::io::stdout().flush().unwrap();
         // update_temperature_display(1.0 / beta);
     }
 
