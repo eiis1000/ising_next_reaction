@@ -1,6 +1,3 @@
-# Note: this code was written mostly by Github Copilot with only minor tweaks by me
-# (in contrast to my Rust code which was written mostly by me with minor fixes by Copilot)
-
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -26,15 +23,16 @@ def process_data(data, discard_bottom=True):
             subset = mags[len(mags)//2:]
         else:
             subset = mags[:]
-        mean = np.median(subset)
+        mean = np.median(subset + [1])
         min_val = np.min(subset)
         max_val = np.max(subset)
         processed_data.append((temp, mean, min_val, max_val))
     
     return processed_data
 
+# I wrote this with copilot as I usually do when writing mpl code
 def plot_data(processed_data, output_path):
-    plt.clf()  # Clear the current figure
+    # plt.clf()  # Clear the current figure
     temps, means, min_vals, max_vals = zip(*processed_data)
     print(f"Building {output_path}")
     syst_width = int(output_path.split("/")[-1].split("_")[0])
