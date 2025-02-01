@@ -147,7 +147,7 @@ impl<'a, R: Rng> IsingEvolutionManager<'a, R> {
                 ix,
                 Reverse(r32(self.time + rng_buffers.sample(self.ising.energy(ix)))),
             );
-            for nix in self.ising.neighbor_indices(ix).data {
+            for nix in *self.ising.neighbor_indices(ix) {
                 self.pq.change_priority(
                     &nix,
                     Reverse(r32(self.time + rng_buffers.sample(self.ising.energy(nix)))),

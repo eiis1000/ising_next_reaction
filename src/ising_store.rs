@@ -5,6 +5,15 @@ use std::fmt;
 pub struct NeighborData<T> {
     pub data: [T; Ising::NUM_NEIGHBORS as usize],
 }
+
+impl<T> std::ops::Deref for NeighborData<T> {
+    type Target = [T; Ising::NUM_NEIGHBORS as usize];
+
+    fn deref(&self) -> &Self::Target {
+        &self.data
+    }
+}
+
 pub struct Ising {
     store: BitVec,
     width: usize,
@@ -66,7 +75,7 @@ impl Ising {
     // using i8 so that it can be more easily used in the energy calculation
     pub fn neighbor_states(&self, ix: usize) -> NeighborData<bool> {
         NeighborData {
-            data: self.neighbor_indices(ix).data.map(|i| self.store[i]),
+            data: self.neighbor_indices(ix).map(|i| self.store[i]),
         }
     }
 
@@ -74,7 +83,6 @@ impl Ising {
     pub fn energy(&self, ix: usize) -> i8 {
         let total_spin: i8 = self
             .neighbor_states(ix)
-            .data
             .iter()
             .map(|&i| if i { 1i8 } else { -1i8 })
             .sum();
