@@ -29,7 +29,7 @@ impl Ising {
     // this is the number of neighbors of a given spin, not including itself
     pub const NUM_NEIGHBORS: u8 = 4;
     // if the i8 representation of the energy is between -m and +M, this is M+m+1
-    pub const NUM_ENERGIES: u8 = (Ising::NUM_NEIGHBORS * 2 + 1) as u8;
+    pub const NUM_ENERGIES: u8 = Ising::NUM_NEIGHBORS * 2 + 1;
 
     pub fn new(width: usize, height: usize, rng: &mut impl Rng) -> Ising {
         let n_cells = width * height;
