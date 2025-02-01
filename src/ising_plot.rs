@@ -1,3 +1,6 @@
+// This code is an AI-generated plotter to give me an idea
+// of what my results look like without needing to use Python.
+
 use anyhow::{anyhow, Result};
 use noisy_float::types::N32;
 use plotters::prelude::*;
