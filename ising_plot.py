@@ -32,7 +32,7 @@ def process_data(data, discard_bottom=True):
 
 # I wrote this with copilot as I usually do when writing mpl code
 def plot_data(processed_data, output_path):
-    # plt.clf()  # Clear the current figure
+    plt.clf()  # comment this line for stacked figures
     temps, means, min_vals, max_vals = zip(*processed_data)
     print(f"Building {output_path}")
     syst_width = int(output_path.split("/")[-1].split("_")[0])
@@ -40,8 +40,9 @@ def plot_data(processed_data, output_path):
     plt.errorbar(temps, means, yerr=yerr, fmt='o', capsize=5, label=f'{syst_width} Magnetization')
     plt.xlabel('Temperature')
     plt.ylabel('Magnetization')
+    plt.axvline(x=2.27, color='gray', linestyle='--', label='Critical Temp 2.27')
     plt.ylim(0, 1)
-    plt.title(f'Magnetization vs Temperature')
+    plt.title(f'Mean Absolute Magnetization vs Temperature')
     plt.legend()
     plt.savefig(output_path)
     # plt.show()
